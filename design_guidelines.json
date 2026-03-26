@@ -1,0 +1,102 @@
+{
+  "project_name": "MoonshotX",
+  "domain": "Quant Trading System Dashboard",
+  "theme": "dark",
+  "archetype": "Archetype 4 (Swiss & High-Contrast) + Retro-Futurism",
+  "emotional_tone": "Authoritative, High-Tech, Data-Dense, Elite, Tactical",
+  "colors": {
+    "background": "#030305",
+    "surface": "#08080A",
+    "surface_glass": "rgba(8, 8, 10, 0.7)",
+    "border": "rgba(255, 255, 255, 0.08)",
+    "border_active": "rgba(0, 229, 255, 0.5)",
+    "primary": "#00E5FF",
+    "primary_hover": "#80F2FF",
+    "text_primary": "#FFFFFF",
+    "text_secondary": "rgba(255, 255, 255, 0.6)",
+    "text_muted": "rgba(255, 255, 255, 0.4)",
+    "success": "#00FF87",
+    "danger": "#FF3B30",
+    "danger_hover": "#FF6B63",
+    "warning": "#FFCC00",
+    "neutral": "#8E8E93"
+  },
+  "typography": {
+    "font_family": {
+      "headings": "JetBrains Mono, monospace",
+      "body": "IBM Plex Sans, sans-serif",
+      "data": "JetBrains Mono, monospace"
+    },
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl font-black tracking-tighter uppercase",
+      "h2": "text-2xl sm:text-3xl font-bold tracking-tight",
+      "h3": "text-xl sm:text-2xl font-bold tracking-tight",
+      "h4": "text-lg sm:text-xl font-medium tracking-tight",
+      "body": "text-sm sm:text-base leading-relaxed text-white/80",
+      "small": "text-xs tracking-widest uppercase text-white/60",
+      "data_large": "text-3xl font-light tracking-tight text-white",
+      "data_label": "text-xs tracking-[0.2em] uppercase text-white/50"
+    }
+  },
+  "surface_strategies": {
+    "global_containers": "The 'Grid Borders' look: Flat backgrounds, 1px sharp borders (border-white/10), no drop shadows. Strictly 2D and dense.",
+    "cards_and_widgets": "Flat solid background (#08080A) with 1px border. On hover, slight border color shift to primary/50. No elevation.",
+    "agent_brain_logs": "The 'Terminal' look: Deep black background, subtle phosphor green or cyan borders, monospace text exclusively, subtle CSS scanline overlay for the aesthetic.",
+    "header_nav": "Crystal Glass variant: backdrop-blur-xl bg-black/60 with a sharp 1px bottom border (border-white/10).",
+    "emergency_halt": "Solid Signal Red background (#FF3B30) with pure white bold text. Must use 'Tracing Beam' or subtle pulsing ring to remain perpetually visible and distinct from all other data."
+  },
+  "layout_and_spacing": {
+    "grid_system": "MODE B: THE 'CONTROL ROOM' GRID. Strict grid-cols-1 md:grid-cols-4 lg:grid-cols-12 layout. Dense data packing.",
+    "spacing_scale": "Use tight gaps (gap-4 or gap-6) between widgets to maintain dashboard density. Use generous internal padding (p-4 to p-6) inside widgets to prevent claustrophobia.",
+    "alignment": "Left-align all data tables, agent logs, and textual readouts. Right-align monetary values and performance metrics in tables. Never center-align paragraphs."
+  },
+  "components": {
+    "strategy": "Shadcn/UI extensively modified. Strip out all rounded-md and default shadow-sm. Use rounded-none or rounded-sm (max 2px) for a sharper, aggressive quant feel.",
+    "buttons": "Rectangular, sharp edges (rounded-none). Primary buttons use primary color (#00E5FF) text on transparent bg with 1px primary border. Hover: invert to solid primary bg with black text.",
+    "tables": "Shadcn Table. Dense sizing. Border-collapse with border-b border-white/5 on rows. Hover state: bg-white/5.",
+    "charts": "Shadcn Charts (Recharts). Use strictly primary, success, and danger colors. Minimal grid lines (stroke-white/5).",
+    "badges": "Square (rounded-none). text-xs uppercase tracking-widest. Used for Regime Indicators (Bull, Bear, Fear).",
+    "icons": "Phosphor Icons (@phosphor-icons/react). Use 'regular' or 'bold' weights. Essential for dense dashboards."
+  },
+  "motion_and_interactions": {
+    "hover": "Instant or very fast transitions (duration-150 ease-in-out). Change border colors and text colors, avoid scaling transforms to maintain grid integrity.",
+    "live_data": "Flash background of updated cells briefly (green for up, red for down) then fade to transparent over 500ms.",
+    "agent_pipeline": "Use framer-motion for a glowing 'active' node that travels between agents. A subtle pulse (animate-pulse) on the currently running agent.",
+    "page_transitions": "None or simple fade. Speed and performance are critical for a quant terminal."
+  },
+  "accessibility": {
+    "contrast": "All text must pass APCA and WCAG AA guidelines against the #030305 background. Muted text should not drop below 4.5:1 ratio.",
+    "focus": "focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary on all inputs and buttons.",
+    "data_testid": "MANDATORY. All buttons, nav links, table rows, and key metrics must have a data-testid attribute in kebab-case (e.g., 'nav-positions-link', 'emergency-halt-btn')."
+  },
+  "pages_and_features": {
+    "main_dashboard": "Overview of regime, equity curve (large Recharts area chart), and 4-column bento summary of active positions and system status.",
+    "positions_page": "Full-width dense data table for open positions (P&L, R-multiple, hold time). Use red/green color coding exclusively for P&L.",
+    "agent_brain_page": "Split view: Left side shows the pipeline visualization (who is talking), Right side shows the streaming debate log in terminal-style typography.",
+    "performance_page": "Heavy use of Recharts. Drawdown chart in red, Equity curve in blue/cyan. Stat grids for Win Rate, Profit Factor, Sharpe.",
+    "universe_page": "Ranked stock list. Use subtle bar visuals inside the table cells to represent Bayesian/Momentum scores visually.",
+    "settings_page": "Dense form layouts using Shadcn Forms. Sliders for risk parameters, inputs for LLM cost limits."
+  },
+  "media_and_assets": {
+    "images": [
+      {
+        "category": "background",
+        "description": "Subtle, dark, sleek trading terminal background with abstract grid and micro-charts. Use for login or empty states.",
+        "url": "https://static.prod-images.emergentagent.com/jobs/b635368b-d1ad-4abf-803f-e0d8150c77d5/images/0e5e022e56552656d1058bd45c90895a8b356aad83e775e4dcb3333863d6da4d.png"
+      },
+      {
+        "category": "background_abstract",
+        "description": "Abstract glowing nodes and connections on obsidian background. Ideal for the Agent Brain / Pipeline background overlay.",
+        "url": "https://static.prod-images.emergentagent.com/jobs/b635368b-d1ad-4abf-803f-e0d8150c77d5/images/aeeae5f2bd6bd269faeef92dfcb7456ab0490848fc59594537149f4804a7d35b.png"
+      }
+    ],
+    "icons_library": "yarn add @phosphor-icons/react"
+  },
+  "instructions_to_main_agent": [
+    "Strictly follow the color palette. DO NOT invent new gray scales; rely on the base background and borders.",
+    "Use JetBrains Mono for all headings, numbers, and data tables.",
+    "Apply 'data-testid' to EVERY interactive element and key metric block.",
+    "Keep component borders to 1px with no border-radius (rounded-none) to achieve the technical Swiss/Quant look.",
+    "The Emergency Halt button MUST be perpetually visible on every screen, likely in the global top header, rendered in solid Signal Red (#FF3B30)."
+  ]
+}

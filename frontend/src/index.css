@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #030305;
+  --surface: #08080A;
+  --surface-2: #0D0D10;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-active: rgba(0, 229, 255, 0.5);
+  --primary: #00E5FF;
+  --primary-hover: #80F2FF;
+  --success: #00FF87;
+  --danger: #FF3B30;
+  --warning: #FFCC00;
+  --text-primary: #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-muted: rgba(255, 255, 255, 0.4);
+  --radius: 2px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.24); }
+
+/* Mono font for data */
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+
+/* Scanline overlay for terminal look */
+.terminal-bg {
+  background-color: #020305;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 229, 255, 0.01) 2px,
+    rgba(0, 229, 255, 0.01) 4px
+  );
+}
+
+/* Glow effects */
+.glow-cyan { box-shadow: 0 0 12px rgba(0, 229, 255, 0.25); }
+.glow-green { box-shadow: 0 0 12px rgba(0, 255, 135, 0.25); }
+.glow-red { box-shadow: 0 0 12px rgba(255, 59, 48, 0.35); }
+
+/* Emergency halt pulse */
+@keyframes halt-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7); }
+  50% { box-shadow: 0 0 0 6px rgba(255, 59, 48, 0); }
+}
+.halt-pulse { animation: halt-pulse 2s infinite; }
+
+/* Agent activity pulse */
+@keyframes agent-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.agent-running { animation: agent-pulse 1s ease-in-out infinite; }
+
+/* Number flash animations */
+@keyframes flash-green {
+  0% { background-color: rgba(0, 255, 135, 0.3); }
+  100% { background-color: transparent; }
+}
+@keyframes flash-red {
+  0% { background-color: rgba(255, 59, 48, 0.3); }
+  100% { background-color: transparent; }
+}
+.flash-green { animation: flash-green 0.5s ease-out; }
+.flash-red { animation: flash-red 0.5s ease-out; }
+
+/* Card hover */
+.card-hover {
+  transition: border-color 150ms ease-in-out;
+}
+.card-hover:hover {
+  border-color: rgba(0, 229, 255, 0.3) !important;
+}
+
+/* Regime badge colors */
+.regime-bull { background: rgba(0, 255, 135, 0.15); color: #00FF87; border-color: rgba(0, 255, 135, 0.3); }
+.regime-neutral { background: rgba(0, 229, 255, 0.1); color: #00E5FF; border-color: rgba(0, 229, 255, 0.3); }
+.regime-fear { background: rgba(255, 204, 0, 0.15); color: #FFCC00; border-color: rgba(255, 204, 0, 0.3); }
+.regime-choppy { background: rgba(255, 165, 0, 0.15); color: #FFA500; border-color: rgba(255, 165, 0, 0.3); }
+.regime-bear_mode { background: rgba(255, 59, 48, 0.15); color: #FF3B30; border-color: rgba(255, 59, 48, 0.3); }
+.regime-extreme_fear { background: rgba(180, 0, 0, 0.2); color: #FF3B30; border-color: rgba(255, 59, 48, 0.5); }
+
+/* Nav active state */
+.nav-active {
+  color: var(--primary);
+  border-left: 2px solid var(--primary);
+  background: rgba(0, 229, 255, 0.06);
+}
+
+/* Table rows */
+.table-row-hover:hover { background: rgba(255,255,255,0.03); }
