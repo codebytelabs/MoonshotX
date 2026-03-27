@@ -35,6 +35,8 @@ class TradingLoop:
         self._last_scan_time = None        # last time we ran entry scanning (5-min gate)
         self._eod_compare_date: date = None  # date we last ran daily market comparison
         self._sod_equity: float = 0.0        # start-of-day equity for comparison
+        self._brief_avoid: set = set()       # morning brief avoid list (refreshed daily)
+        self._brief_avoid_date: date = None  # date the avoid list was last loaded
 
     async def run(self, state):
         """Main loop — runs every 60s while state.is_running is True."""
@@ -238,7 +240,17 @@ class TradingLoop:
         if not self.risk.can_add_position(regime, open_count, portfolio_value):
             return
 
-        # ── 8. Scan universe (dynamic count based on regime + portfolio) ─
+        # ── 8. Load today's morning brief avoid list (once per day) ──────
+        today = datetime.now(timezone.utc).date()
+        if self._brief_avoid_date != today:
+            brief_doc = await self.db.morning_briefs.find_one({}, sort=[("created_at", -1)])
+            if brief_doc:
+                self._brief_avoid = set(brief_doc.get("avoid_picks", []))
+                self._brief_avoid_date = today
+                if self._brief_avoid:
+                    logger.info(f"[BRIEF] Avoid list loaded: {sorted(self._brief_avoid)}")
+
+        # ── 8b. Scan universe (dynamic count based on regime + portfolio) ─
         n_candidates = self.risk.candidates_to_scan(regime, portfolio_value)
         candidates = await self.scanner.get_top_candidates(n=n_candidates, min_bayesian=0.45)
         logger.info(f"Scanning {len(candidates)}/{n_candidates} candidates (max_pos={max_pos}, regime={regime}, pv=${portfolio_value:,.0f})")
@@ -252,6 +264,9 @@ class TradingLoop:
         batch_payload = []
         for ticker in candidates:
             if ticker in open_tickers:
+                continue
+            if ticker in self._brief_avoid:
+                logger.info(f"Brief avoid {ticker}: on today's morning brief avoid list")
                 continue
             sector_ok, sector_reason = can_add_to_sector(ticker, open_positions, regime)
             if not sector_ok:
