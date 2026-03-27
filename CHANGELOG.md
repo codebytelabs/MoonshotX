@@ -6,6 +6,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.1] — 2026-03-27
+
+### Fixed
+- **Portfolio-scaled max positions** — old formula `pv / (pv × pct)` simplified to `1/pct`, making portfolio size irrelevant. New formula uses `log₂(pv / 25K) × 4 + 6` as a base, multiplied by regime factor. A $138K portfolio in fear now gets 7 slots (was always 6 regardless of size). Larger portfolios get proper diversification.
+
+### Changed
+- `risk.py` — `REGIME_PROFILES` now includes `regime_pos_mult` (bull=1.0, neutral=0.75, fear=0.50, choppy=0.40, bear=0.25, extreme_fear=0.0) and raised `max_pos_cap` ceilings (bull=25, neutral=18, fear=10, choppy=8, bear=4)
+- `README.md` — regime table updated to show portfolio-scaled max positions across tiers ($50K–$500K+)
+
+---
+
 ## [0.3.0] — 2026-03-27
 
 ### Added

@@ -10,19 +10,20 @@ logger = logging.getLogger("moonshotx.risk")
 # ── Regime profiles ───────────────────────────────────────────────────────────
 # Each regime defines:
 #   size_mult        — multiplier on per-trade risk allocation
-#   target_pos_pct   — target % of portfolio per position (drives max positions)
+#   target_pos_pct   — target % of portfolio per single position (for sizing cap)
+#   regime_pos_mult  — multiplier on portfolio-scaled base for max positions
 #   max_pos_cap      — absolute ceiling regardless of portfolio size
 #   min_pos_floor    — minimum positions allowed (if regime trades at all)
 #   scan_mult        — how many candidates to scan relative to max positions
 #   allow_longs      — whether to open new long positions
 #   daily_trade_mult — multiplier on base daily trade limit
 REGIME_PROFILES = {
-    "bull":          {"size_mult": 1.25, "target_pos_pct": 0.05, "max_pos_cap": 20, "min_pos_floor": 6,  "scan_mult": 2.0, "allow_longs": True,  "daily_trade_mult": 1.5, "max_new_per_loop": 3},
-    "neutral":       {"size_mult": 1.00, "target_pos_pct": 0.07, "max_pos_cap": 12, "min_pos_floor": 4,  "scan_mult": 2.0, "allow_longs": True,  "daily_trade_mult": 1.2, "max_new_per_loop": 2},
-    "fear":          {"size_mult": 0.70, "target_pos_pct": 0.10, "max_pos_cap": 6,  "min_pos_floor": 2,  "scan_mult": 1.5, "allow_longs": True,  "daily_trade_mult": 0.8, "max_new_per_loop": 2},
-    "choppy":        {"size_mult": 0.40, "target_pos_pct": 0.15, "max_pos_cap": 5,  "min_pos_floor": 1,  "scan_mult": 1.5, "allow_longs": True,  "daily_trade_mult": 0.6, "max_new_per_loop": 1},
-    "bear_mode":     {"size_mult": 0.30, "target_pos_pct": 0.20, "max_pos_cap": 3,  "min_pos_floor": 0,  "scan_mult": 1.0, "allow_longs": False, "daily_trade_mult": 0.5, "max_new_per_loop": 0},
-    "extreme_fear":  {"size_mult": 0.00, "target_pos_pct": 1.00, "max_pos_cap": 0,  "min_pos_floor": 0,  "scan_mult": 0.0, "allow_longs": False, "daily_trade_mult": 0.0, "max_new_per_loop": 0},
+    "bull":          {"size_mult": 1.25, "target_pos_pct": 0.05, "regime_pos_mult": 1.00, "max_pos_cap": 25, "min_pos_floor": 6,  "scan_mult": 2.0, "allow_longs": True,  "daily_trade_mult": 1.5, "max_new_per_loop": 3},
+    "neutral":       {"size_mult": 1.00, "target_pos_pct": 0.07, "regime_pos_mult": 0.75, "max_pos_cap": 18, "min_pos_floor": 4,  "scan_mult": 2.0, "allow_longs": True,  "daily_trade_mult": 1.2, "max_new_per_loop": 2},
+    "fear":          {"size_mult": 0.70, "target_pos_pct": 0.10, "regime_pos_mult": 0.50, "max_pos_cap": 10, "min_pos_floor": 2,  "scan_mult": 1.5, "allow_longs": True,  "daily_trade_mult": 0.8, "max_new_per_loop": 2},
+    "choppy":        {"size_mult": 0.40, "target_pos_pct": 0.15, "regime_pos_mult": 0.40, "max_pos_cap": 8,  "min_pos_floor": 1,  "scan_mult": 1.5, "allow_longs": True,  "daily_trade_mult": 0.6, "max_new_per_loop": 1},
+    "bear_mode":     {"size_mult": 0.30, "target_pos_pct": 0.20, "regime_pos_mult": 0.25, "max_pos_cap": 4,  "min_pos_floor": 0,  "scan_mult": 1.0, "allow_longs": False, "daily_trade_mult": 0.5, "max_new_per_loop": 0},
+    "extreme_fear":  {"size_mult": 0.00, "target_pos_pct": 1.00, "regime_pos_mult": 0.00, "max_pos_cap": 0,  "min_pos_floor": 0,  "scan_mult": 0.0, "allow_longs": False, "daily_trade_mult": 0.0, "max_new_per_loop": 0},
 }
 
 # ── Base guardrails (scale with portfolio) ────────────────────────────────────
@@ -65,12 +66,21 @@ class RiskManager:
     # ── Dynamic limits ────────────────────────────────────────────────────
 
     def max_positions(self, regime: str, portfolio_value: float = 0) -> int:
-        """Dynamic max positions = portfolio_value / target_position_value, clamped by regime caps."""
+        """Portfolio-scaled max positions: log-scaled base × regime multiplier.
+
+        Larger portfolios get more positions for diversification:
+          $25K → base 6, $50K → 8, $100K → 10, $200K → 12, $500K → 16, $1M → 18
+        Regime then narrows or widens:
+          bull × 1.0, neutral × 0.75, fear × 0.50, choppy × 0.40, bear × 0.25
+        """
         pv = portfolio_value or self.current_capital or 50_000
         p = _get_profile(regime)
-        if p["size_mult"] == 0.0:
+        regime_mult = p.get("regime_pos_mult", 0.5)
+        if regime_mult == 0.0 or p["size_mult"] == 0.0:
             return 0
-        raw = int(pv * (1.0 / max(pv * p["target_pos_pct"], 1)))
+        # Log-scaled base: grows sub-linearly with portfolio (doubling PV ≈ +4 slots)
+        base = min(20, int(4 * math.log2(max(pv, 25_000) / 25_000) + 6))
+        raw = max(1, int(base * regime_mult))
         return max(p["min_pos_floor"], min(raw, p["max_pos_cap"]))
 
     def max_daily_trades(self, regime: str) -> int:

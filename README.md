@@ -123,13 +123,17 @@ See **[PERFORMANCE_LOG.md](PERFORMANCE_LOG.md)** for the full history.
 - **Phase B (DEEP model):** Full trade plans (entry, stop loss, take profit, conviction, risk level) for shortlisted tickers
 
 ### 🛡️ Regime-Adaptive Risk Management
-| Regime | Max Loss | Stale Exit | Max Positions |
-|--------|----------|------------|---------------|
-| Bull | 6% | 8 hours | 8 |
-| Neutral | 4% | 6 hours | 6 |
-| Fear | 2.5% | 3 hours | 3 |
-| Bear Mode | 2% | 2 hours | 2 |
-| Extreme Fear | 1.5% | 1 hour | 1 |
+
+Max positions scale with **both** portfolio size and regime (log₂-scaled base × regime multiplier):
+
+| Regime | Max Loss | Stale Exit | $50K | $100K | $138K | $250K | $500K+ |
+|--------|----------|------------|------|-------|-------|-------|--------|
+| Bull | 6% | 8 hours | 10 | 14 | 15 | 19 | 20 |
+| Neutral | 4% | 6 hours | 7 | 10 | 11 | 14 | 15 |
+| Fear | 2.5% | 3 hours | 5 | 7 | 7 | 9 | 10 |
+| Choppy | 2.5% | 3 hours | 4 | 5 | 6 | 7 | 8 |
+| Bear Mode | 2% | 2 hours | 2 | 3 | 3 | 4 | 4 |
+| Extreme Fear | 1.5% | 1 hour | 0 | 0 | 0 | 0 | 0 |
 
 ### 🚦 Entry Quality Gates (in order)
 1. **Re-entry cooldown** — 2-hour block after any loss exit (persisted to MongoDB, survives restarts)
