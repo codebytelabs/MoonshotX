@@ -462,6 +462,29 @@ async def get_config():
     }
 
 
+@api_router.get("/morning-brief")
+async def get_morning_brief():
+    """Return the latest morning intelligence brief."""
+    doc = await db.morning_briefs.find_one({}, {"_id": 0}, sort=[("created_at", -1)])
+    if not doc:
+        return {"available": False}
+    return {
+        "available": True,
+        "created_at": doc.get("created_at"),
+        "trading_stance": doc.get("trading_stance", "normal"),
+        "expected_regime": doc.get("expected_regime"),
+        "session_sentiment": doc.get("session_sentiment"),
+        "brief_summary": doc.get("brief_summary"),
+        "hot_sectors": doc.get("hot_sectors", []),
+        "avoid_sectors": doc.get("avoid_sectors", []),
+        "key_themes": doc.get("key_themes", []),
+        "macro_risks": doc.get("macro_risks", []),
+        "top_picks": doc.get("top_picks", []),
+        "avoid_picks": doc.get("avoid_picks", []),
+        "raw_intel_summary": doc.get("raw_intel_summary", {}),
+    }
+
+
 @api_router.get("/agent-logs")
 async def get_agent_logs(limit: int = 20):
     logs = await db.agent_logs.find({}, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)

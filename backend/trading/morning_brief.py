@@ -232,7 +232,7 @@ async def run_morning_brief(
     user_p = _build_brief_prompt(intel, regime_data, watchlist)
 
     try:
-        brief = await pipeline._call_llm(sys_p, user_p, model=pipeline.DEEP_MODEL, timeout=30)
+        brief = await pipeline._call_llm(sys_p, user_p, model=pipeline.DEEP_MODEL, timeout=90)
     except Exception as e:
         logger.error(f"[MORNING BRIEF] LLM call failed: {e}")
         return {"raw_intel": intel}
