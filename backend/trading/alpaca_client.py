@@ -193,14 +193,17 @@ class AlpacaClient:
             logger.warning(f"get_most_active error: {e}")
             return []
 
-    async def get_portfolio_history(self, period: str = "1M", timeframe: str = "1D", extended_hours: bool = True) -> dict:
+    async def get_portfolio_history(self, period: str = "1M", timeframe: str = "1D", extended_hours: bool = True, start_date: str = "") -> dict:
         """Fetch portfolio value history from Alpaca.
         period: 1D, 1W, 1M, 3M, 6M, 1A
         timeframe: 1Min, 5Min, 15Min, 1H, 1D
+        start_date: optional ISO date string (YYYY-MM-DD) to cap history start
         Returns list of {ts, value} dicts.
         """
         try:
             params = f"?period={period}&timeframe={timeframe}&extended_hours={str(extended_hours).lower()}"
+            if start_date:
+                params += f"&start={start_date[:10]}"
             raw = await asyncio.to_thread(self._get, f"/v2/account/portfolio/history{params}")
             timestamps = raw.get("timestamp", [])
             equity = raw.get("equity", [])
