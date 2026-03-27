@@ -420,15 +420,8 @@ async def get_nav_chart(timeframe: str = "1D"):
     }
     alpaca_period, alpaca_tf = tf_map.get(timeframe, ("6M", "1D"))
 
-    # ── Determine MoonshotX launch date (cap history to this project only) ─
-    MOONSHOTX_START = "2026-03-26"  # fallback hard floor
-    first_snap = await db.nav_snapshots.find_one({}, sort=[("ts", 1)])
-    if first_snap and first_snap.get("ts"):
-        MOONSHOTX_START = str(first_snap["ts"])[:10]
-
     # ── Primary: fetch from Alpaca exchange ───────────────────────────────
-    data = await alpaca.get_portfolio_history(period=alpaca_period, timeframe=alpaca_tf,
-                                              start_date=MOONSHOTX_START)
+    data = await alpaca.get_portfolio_history(period=alpaca_period, timeframe=alpaca_tf)
 
     if data:
         return {"timeframe": timeframe, "source": "alpaca", "data": data}
