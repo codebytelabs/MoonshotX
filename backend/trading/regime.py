@@ -4,12 +4,54 @@ import logging
 from datetime import datetime, timezone
 from typing import Dict
 
+import requests
 import yfinance as yf
 
 logger = logging.getLogger("moonshotx.regime")
 
 REGIME_CACHE: Dict = {"regime": "neutral", "updated_at": None, "data": {}}
 CACHE_TTL_SECONDS = 300  # 5 minutes
+
+_CNN_FG_URL = "https://production.dataviz.cnn.io/index/fearandgreed/graphdata"
+_CNN_HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"}
+
+_SECTOR_ETFS = ["XLK", "XLF", "XLE", "XLV", "XLI", "XLY", "XLC", "XLRE", "XLU", "XLB", "XLP"]
+
+
+def _fetch_fear_greed(vix: float = 20.0, spy_20d: float = 0.0) -> float:
+    """Fetch real Fear & Greed from CNN. Falls back to VIX/momentum formula."""
+    try:
+        r = requests.get(_CNN_FG_URL, headers=_CNN_HEADERS, timeout=6)
+        r.raise_for_status()
+        score = float(r.json()["fear_and_greed"]["score"])
+        logger.debug(f"CNN Fear & Greed: {score:.1f}")
+        return round(score, 1)
+    except Exception as e:
+        logger.warning(f"CNN Fear & Greed unavailable ({e}), using formula fallback")
+        vix_fg = max(0.0, min(100.0, 100.0 - (vix - 10.0) * 4.0))
+        mom_fg = max(0.0, min(100.0, 50.0 + spy_20d * 500.0))
+        return round(0.6 * vix_fg + 0.4 * mom_fg, 1)
+
+
+def _fetch_sector_breadth() -> float:
+    """Real breadth: % of 11 S&P 500 sector ETFs above their 200-day SMA."""
+    above = 0
+    total = 0
+    for sym in _SECTOR_ETFS:
+        try:
+            hist = yf.Ticker(sym).history(period="1y", interval="1d")
+            if len(hist) >= 200:
+                sma200 = float(hist["Close"].rolling(200).mean().iloc[-1])
+                price = float(hist["Close"].iloc[-1])
+                above += 1 if price > sma200 else 0
+                total += 1
+        except Exception:
+            pass
+    if total == 0:
+        return 0.50
+    breadth = above / total
+    logger.debug(f"Sector breadth: {above}/{total} ETFs above 200-SMA = {breadth:.2f}")
+    return round(breadth, 3)
 
 
 def _fetch_regime_data() -> dict:
@@ -35,19 +77,8 @@ def _fetch_regime_data() -> dict:
         spy_20d = 0.0
         spy_price = 0.0
 
-    # Estimate Fear & Greed from VIX (inverted + SPY momentum)
-    vix_fg = max(0.0, min(100.0, 100.0 - (vix - 10.0) * 4.0))
-    mom_fg = max(0.0, min(100.0, 50.0 + spy_20d * 500.0))
-    fear_greed = round(0.6 * vix_fg + 0.4 * mom_fg, 1)
-
-    # Simplified breadth: estimate from SPY vs 200-day SMA ratio
-    try:
-        spy_long = yf.Ticker("SPY").history(period="1y", interval="1d")
-        sma_200 = float(spy_long["Close"].rolling(200).mean().iloc[-1]) if len(spy_long) >= 200 else spy_price * 0.95
-        breadth = 0.65 if spy_price > sma_200 else 0.35
-    except Exception:
-        breadth = 0.50
-
+    fear_greed = _fetch_fear_greed(vix=vix, spy_20d=spy_20d)
+    breadth = _fetch_sector_breadth()
     regime = _classify(vix, fear_greed, breadth, spy_20d)
 
     return {
