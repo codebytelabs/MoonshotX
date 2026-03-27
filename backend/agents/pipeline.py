@@ -17,19 +17,45 @@ from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 logger = logging.getLogger("moonshotx.pipeline")
 
-# ── Model assignments — read from .env, fallback to benchmark winners ─────
-QUICK_MODEL    = os.environ.get("Openrouter_Quick_Primary_Model",    "google/gemini-2.5-flash-lite-preview-09-2025")
-QUICK_FALLBACK = os.environ.get("Openrouter_Quick_Backup_Model",     "google/gemini-3.1-flash-lite-preview")
-DEEP_MODEL     = os.environ.get("Openrouter_Research_Primary_Model", "anthropic/claude-haiku-4-5")
-DEEP_FALLBACK  = os.environ.get("Openrouter_Research_Backup_Model",  "minimax/minimax-m2.7")
+# ── Provider selection — single switch in .env ────────────────────────────
+# LLM_PROVIDER = "openrouter" | "ollama"
+LLM_PROVIDER = os.environ.get("LLM_PROVIDER", "openrouter").lower()
 
-LLM_PROVIDER = "openrouter"
+if LLM_PROVIDER == "ollama":
+    QUICK_MODEL    = os.environ.get("Ollama_Quick_Primary_Model",    "gemini-3-flash-preview:cloud")
+    QUICK_FALLBACK = os.environ.get("Ollama_Quick_Backup_Model",     "glm-5:cloud")
+    DEEP_MODEL     = os.environ.get("Ollama_Research_Primary_Model", "kimi-k2.5:cloud")
+    DEEP_FALLBACK  = os.environ.get("Ollama_Research_Backup_Model",  "glm-5:cloud")
+    _LLM_API_KEY   = os.environ.get("OLLAMA_API_KEY", "")
+else:
+    # Default: openrouter
+    LLM_PROVIDER   = "openrouter"
+    QUICK_MODEL    = os.environ.get("Openrouter_Quick_Primary_Model",    "google/gemini-2.5-flash-lite-preview-09-2025")
+    QUICK_FALLBACK = os.environ.get("Openrouter_Quick_Backup_Model",     "google/gemini-3.1-flash-lite-preview")
+    DEEP_MODEL     = os.environ.get("Openrouter_Research_Primary_Model", "anthropic/claude-haiku-4-5")
+    DEEP_FALLBACK  = os.environ.get("Openrouter_Research_Backup_Model",  "google/gemini-3.1-flash-lite-preview")
+    _LLM_API_KEY   = os.environ.get("OPENROUTER_API_KEY", os.environ.get("EMERGENT_LLM_KEY", ""))
 
-logger.info(f"Models loaded — quick={QUICK_MODEL} | deep={DEEP_MODEL} | quick_fallback={QUICK_FALLBACK} | deep_fallback={DEEP_FALLBACK}")
+logger.info(
+    f"LLM provider={LLM_PROVIDER.upper()} | "
+    f"quick={QUICK_MODEL} | quick_fallback={QUICK_FALLBACK} | "
+    f"deep={DEEP_MODEL} | deep_fallback={DEEP_FALLBACK}"
+)
 
 # Approximate cost per call (USD) for budget tracking
-_COST_QUICK = 0.00004   # gemini-2.5-flash-lite avg per call
-_COST_DEEP  = 0.00130   # claude-haiku-4-5 avg per call
+_COST_MAP = {
+    # openrouter
+    "google/gemini-2.5-flash-lite-preview-09-2025": 0.000040,
+    "google/gemini-3.1-flash-lite-preview":         0.000040,
+    "anthropic/claude-haiku-4-5":                   0.001300,
+    # ollama cloud (estimated, pricing TBD)
+    "gemini-3-flash-preview:cloud":                 0.000050,
+    "glm-5:cloud":                                  0.000100,
+    "kimi-k2.5:cloud":                              0.000200,
+    "nemotron-3-nano:30b-cloud":                    0.000030,
+}
+_COST_QUICK = _COST_MAP.get(QUICK_MODEL, 0.00005)
+_COST_DEEP  = _COST_MAP.get(DEEP_MODEL,  0.00100)
 
 
 def extract_json(text: str) -> dict | list:

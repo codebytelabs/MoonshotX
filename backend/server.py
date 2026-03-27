@@ -90,8 +90,9 @@ def get_components():
             secret_key=os.environ.get("ALPACA_SECRET_KEY", ""),
             base_url=os.environ.get("ALPACA_BASE_URL", "https://paper-api.alpaca.markets"),
         )
+        from agents.pipeline import _LLM_API_KEY as _active_llm_key
         _pipeline = AgentPipeline(
-            llm_api_key=os.environ.get("EMERGENT_LLM_KEY", ""),
+            llm_api_key=_active_llm_key,
             broadcast_fn=lambda data: asyncio.create_task(manager.broadcast(data)),
         )
         _regime_mgr = RegimeManager()
@@ -450,13 +451,13 @@ async def _get_account_cached():
 @api_router.get("/config")
 async def get_config():
     """Return current active configuration (model names, etc.)."""
-    from agents.pipeline import QUICK_MODEL, QUICK_FALLBACK, DEEP_MODEL, DEEP_FALLBACK
+    from agents.pipeline import QUICK_MODEL, QUICK_FALLBACK, DEEP_MODEL, DEEP_FALLBACK, LLM_PROVIDER
     return {
+        "llm_provider": LLM_PROVIDER,
         "quick_model": QUICK_MODEL,
         "quick_fallback": QUICK_FALLBACK,
         "deep_model": DEEP_MODEL,
         "deep_fallback": DEEP_FALLBACK,
-        "llm_provider": "openrouter",
     }
 
 

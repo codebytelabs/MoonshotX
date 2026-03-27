@@ -1,0 +1,98 @@
+[
+  {
+    "provider": "openrouter",
+    "model": "google/gemini-2.5-flash-lite-preview-09-2025",
+    "task": "quick",
+    "latency_s": 1.08,
+    "success": true,
+    "json_valid": true,
+    "has_required_fields": true,
+    "score": 10.2,
+    "error": "",
+    "preview": "[{\"sym\":\"NVDA\",\"decision\":\"BULLISH\",\"confidence\":0.75,\"reason\":\"The stock exhibits a strong RSI above 60 and positive 5-day momentum.\"}]"
+  },
+  {
+    "provider": "openrouter",
+    "model": "google/gemini-3.1-flash-lite-preview",
+    "task": "quick",
+    "latency_s": 3.7,
+    "success": true,
+    "json_valid": true,
+    "has_required_fields": true,
+    "score": 10.06,
+    "error": "",
+    "preview": "[{\"sym\":\"NVDA\",\"decision\":\"BULLISH\",\"confidence\":0.85,\"reason\":\"The stock is in an EMA bullish trend with positive momentum and high relative volume.\"}]"
+  },
+  {
+    "provider": "openrouter",
+    "model": "anthropic/claude-haiku-4-5",
+    "task": "deep",
+    "latency_s": 5.12,
+    "success": true,
+    "json_valid": true,
+    "has_required_fields": true,
+    "score": 9.99,
+    "error": "",
+    "preview": "```json {   \"sym\": \"NVDA\",   \"decision\": \"BUY\",   \"conviction\": 0.72,   \"entry_price\": 875,   \"stop_loss\": 852,   \"take_profit\": 910,   \"position_size_pct\": 8.5,   \"position_size_usd\": 11730,   \"reaso"
+  },
+  {
+    "provider": "openrouter",
+    "model": "minimax/minimax-m2.7",
+    "task": "deep",
+    "latency_s": 24.03,
+    "success": true,
+    "json_valid": false,
+    "has_required_fields": false,
+    "score": 2.05,
+    "error": "'NoneType' object is not subscriptable",
+    "preview": ""
+  },
+  {
+    "provider": "ollama",
+    "model": "gemini-3-flash-preview:cloud",
+    "task": "quick",
+    "latency_s": 3.75,
+    "success": true,
+    "json_valid": true,
+    "has_required_fields": true,
+    "score": 10.06,
+    "error": "",
+    "preview": "[{\"sym\":\"NVDA\",\"decision\":\"BULLISH\",\"confidence\":0.85,\"reason\":\"Positive momentum, bullish EMA alignment, and high relative volume indicate a robust uptrend.\"}]"
+  },
+  {
+    "provider": "ollama",
+    "model": "nemotron-3-nano:30b-cloud",
+    "task": "quick",
+    "latency_s": 0.88,
+    "success": true,
+    "json_valid": false,
+    "has_required_fields": false,
+    "score": 3.21,
+    "error": "",
+    "preview": "[{\"sym\":\"NVDA\",\"decision\":\"BULLISH\",\"confidence\":0.75,\"reason\":\"RSI 62 below overbought threshold with bullish EMA and positive 5-day momentum indicating upward trend\"]}"
+  },
+  {
+    "provider": "ollama",
+    "model": "kimi-k2.5:cloud",
+    "task": "deep",
+    "latency_s": 19.95,
+    "success": true,
+    "json_valid": true,
+    "has_required_fields": true,
+    "score": 9.25,
+    "error": "",
+    "preview": "{\"sym\":\"NVDA\",\"decision\":\"BUY\",\"conviction\":0.75,\"entry_price\":875.0,\"stop_loss\":838.0,\"take_profit\":938.0,\"reasoning\":\"Volume spike 1.8x average confirms institutional accumulation alongside bullish "
+  },
+  {
+    "provider": "ollama",
+    "model": "glm-5:cloud",
+    "task": "deep",
+    "latency_s": 20.78,
+    "success": true,
+    "json_valid": true,
+    "has_required_fields": true,
+    "score": 9.21,
+    "error": "",
+    "preview": "{ \"sym\": \"NVDA\", \"decision\": \"BUY\", \"conviction\": 0.78, \"entry_price\": 876.50, \"stop_loss\": 845.00, \"take_profit\": 940.00, \"reasoning\": \"Bullish EMA alignment and strong volume confirmation suggest co"
+  }
+]

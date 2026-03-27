@@ -6,6 +6,34 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.0] — 2026-03-27
+
+### Added
+- **Multi-provider LLM support** — pipeline now supports `openrouter` and `ollama` (Ollama Cloud) as interchangeable providers. Switch with a single `.env` change: `LLM_PROVIDER=openrouter` or `LLM_PROVIDER=ollama`
+- **Ollama Cloud credentials** in `.env`: `OLLAMA_BASE_URL`, `OLLAMA_API_KEY`, `Ollama_Quick_Primary_Model`, `Ollama_Quick_Backup_Model`, `Ollama_Research_Primary_Model`, `Ollama_Research_Backup_Model`
+- **`__tests__/test_llm_providers.py`** — full benchmark harness that tests all 8 models (4 OpenRouter + 4 Ollama) across quick and deep tasks, scoring on JSON validity, required fields, and latency. Auto-saves results to `llm_benchmark_results.json`
+- **Per-model cost map** in `pipeline.py` for accurate cost tracking across both providers
+
+### Benchmark Results (2026-03-27)
+| Provider | Model | Task | Latency | Score |
+|----------|-------|------|---------|-------|
+| OpenRouter | gemini-2.5-flash-lite | quick | 1.1s | **10.2** |
+| OpenRouter | gemini-3.1-flash-lite | quick | 3.7s | 10.1 |
+| Ollama | gemini-3-flash-preview:cloud | quick | 3.8s | 10.1 |
+| OpenRouter | claude-haiku-4-5 | deep | 5.1s | **10.0** |
+| Ollama | kimi-k2.5:cloud | deep | 19.9s | 9.2 |
+| Ollama | glm-5:cloud | deep | 20.8s | 9.2 |
+| Ollama | nemotron-3-nano:30b-cloud | quick | 0.9s | 3.2 ⚠️ bad JSON |
+| OpenRouter | minimax-m2.7 | deep | 24.0s | 2.0 ⚠️ bad JSON |
+
+### Changed
+- `emergentintegrations/llm/chat.py` — rewritten as true multi-provider client: `_send_openrouter()` and `_send_ollama()` (tries `/v1/chat/completions` first, falls back to native `/api/chat`)
+- `agents/pipeline.py` — `LLM_PROVIDER` read from env at startup; model env vars, API key, and cost estimates all selected per provider
+- `server.py` — pipeline now receives the active provider's API key (`_LLM_API_KEY`); `/api/config` exposes real `llm_provider`
+- `.env` — swapped bad backups: `nemotron-3-nano:30b-cloud` → `glm-5:cloud` (Ollama quick); `minimax/minimax-m2.7` → `google/gemini-3.1-flash-lite-preview` (OpenRouter deep)
+
+---
+
 ## [0.3.1] — 2026-03-27
 
 ### Fixed
